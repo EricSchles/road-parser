@@ -75,22 +75,34 @@ def draw_graph(G):
   plt.axis('off')
   plt.show()
 
+# Prints the path nicely
+def print_path(start, end, path):
+  start_str = " " + start + " >>> " + end + " "
+  line_str = "_"*len(start_str)
+  print line_str + '\n\n' + start_str + '\n' + line_str + '\n'
+  for i, node in enumerate(path):
+    print str(i+1).rjust(3) + ".   " + node
+  print line_str + '\n'
+
 def main():
+  # TODO (gbcowan) get these properly
   input_path = sys.argv[1]
   output_path = sys.argv[2]
   create_flag = (sys.argv[3].upper() =='TRUE')
 
+  # Make nx graph
   G = load_graph(input_path)
   
+  # Make path dictionary
   if(create_flag):
     output_shortest_paths(G, output_path)
 
+  # Print some sample paths
   else:
     paths = load_shortest_paths(output_path)
     start = G.nodes()[34]
     end = G.nodes()[58]
-    print len(paths[start][end])
-
+    print_path(start, end, paths[start][end])
 
 if __name__ == "__main__":
     main()
