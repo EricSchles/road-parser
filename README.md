@@ -10,4 +10,4 @@ If ```CREATE_FLAG``` is  ```TRUE``` a shelve dictionary will be created at the p
 
 Else the dictionary will be loaded in from the path ```DICT_FILE``` to be used for shortest path tests.
 
-Also contains a method for drawing graph to screen, currently unused. path pairs.
+Also contains a method for drawing graph to screen, currently unused. 
