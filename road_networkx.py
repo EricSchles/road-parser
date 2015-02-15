@@ -101,7 +101,7 @@ def main():
   else:
     paths = load_shortest_paths(output_path)
     start = G.nodes()[34]
-    end = G.nodes()[58]
+    end = G.nodes()[1518]
     print_path(start, end, paths[start][end])
 
 if __name__ == "__main__":
