@@ -78,7 +78,7 @@ def draw_graph(G):
 def main():
   input_path = sys.argv[1]
   output_path = sys.argv[2]
-  create_flag = (sys.argv[3]=='TRUE')
+  create_flag = (sys.argv[3].upper() =='TRUE')
 
   G = load_graph(input_path)
   
@@ -94,4 +94,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
