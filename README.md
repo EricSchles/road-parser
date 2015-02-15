@@ -1,7 +1,8 @@
 # road-parser
 Parses WKT csv files generated from subsets of the data.vic.gov.au road network shapefile. 
-Run as ```roadroad_networkx.py INPUT_FILE DICT_FILE CREATE_FLAG``` 
-
+Run as ```python roadroad_networkx.py INPUT_FILE DICT_FILE CREATE_FLAG``` 
+Eg.  ```python roadroad_networkx.py roads.csv paths.dict TRUE```
+Then ```python roadroad_networkx.py roads.csv paths.dict FALSE```
 
 ```CREATE_FLAG``` can be ```TRUE``` or ```_```
 
