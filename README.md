@@ -4,23 +4,21 @@ Parses WKT csv files generated from subsets of the data.vic.gov.au road network 
 
 #### To run 
 
-```python roadroad_networkx.py INPUT_FILE DICT_FILE CREATE_FLAG``` 
+```python roadroad_networkx.py -p PICKLE_PATH [-c CSV_PATH]``` 
 
 ###### Eg.  
 
-```python roadroad_networkx.py roads.csv paths.dict TRUE```
+```python roadroad_networkx.py -p graph.pickle -c roads.csv```
 
 Then 
 
-```python roadroad_networkx.py roads.csv paths.dict FALSE```
+```python roadroad_networkx.py -p graph.pickle```
 
 #### Flags
 
-```CREATE_FLAG``` can be ```TRUE``` or ```_```
+If ```-c CSV_PATH``` is given then the csv file will be read, and a graph generated and pickled to ```PICKLE_PATH```. 
 
-If ```CREATE_FLAG``` is  ```TRUE``` a shelve dictionary will be created at the path ```DICT_FILE``` contianing every shortest path pair of graph.
-
-Else the dictionary will be loaded in from the path ```DICT_FILE``` to be used for shortest path tests.
+Else the graph will be loaded from ```PICKLE_PATH``` and a sample path found and printed.
 
 #### Other
 

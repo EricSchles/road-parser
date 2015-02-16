@@ -1,14 +1,16 @@
+import argparse
 import sys
 import csv
 import re
 import geopy
+import pickle
 import shelve
 from geopy import distance
 import networkx as nx
 import matplotlib.pyplot as plt
 
 # Loads a csv road netowrk file, returns networkx digrpah
-def load_graph(input_path):
+def create_graph(input_path):
   # Create new graph
   G = nx.DiGraph()
   # To grab points from WKT linestring
@@ -30,37 +32,27 @@ def load_graph(input_path):
       # Calc dist between line nodes, and add as weights to edges
       for i in range(len(line)-1):
         dist = distance.distance(line[i], line[i+1]).m
-        for x in [0,1]:
-          if not (str(line[i+x]) in G):
-            G.add_node(str(line[i+x]), geopoint=line[i+x])
         G.add_edge(str(line[i]), str(line[i+1]), weight=dist)
         # IF bidirectional line, add reversed pair
         if bidirectional:
           G.add_edge(str(line[i+1]), str(line[i]), weight=dist)
   return G
 
-# Find all paths and shelve results 
-# Prints % progress as can take a while
-def output_shortest_paths(G, output_path):
-  shelf = shelve.open(output_path)
-  for i, n in enumerate(G):
-    shelf[n] = nx.single_source_shortest_path(G,n)
-    if (i%50 == 0):
-      print "{:5.2f}".format(float(i)/len(G)*100) + "%"
-  print "Done."
-  shelf.close()
+# Stores graph on disk at path
+def pickle_graph(graph, path):
+  nx.write_gpickle(graph, path)
 
-# returns shelve object for all paths
-def load_shortest_paths(path):
-  return shelve.open(path)
+# Load graph from path
+def load_pickled_graph(path):
+  return nx.read_gpickle(path)
 
 # Draw graph
 def draw_graph(G):
 # # add pseudo pos for vis. purposes
-  fp = G.node[G.nodes()[0]]['geopoint']
+  fp = geopy.Point(G.nodes()[0])
   scale = 100000
   for n in G:
-    p = G.node[n]['geopoint']
+    p = geopy.Point(G.node[n])
     G.node[n]['pos'] = ((p.longitude - fp.longitude) * scale, (p.latitude - fp.latitude) * scale)
   # Grab newly created pos attr. 
   pos=nx.get_node_attributes(G,'pos')
@@ -75,6 +67,17 @@ def draw_graph(G):
   plt.axis('off')
   plt.show()
 
+# Takes two geopoints, returns path- list of node names (str(geopoint))
+# If points aren't in network closest nodes will be used
+def get_path(start, end, graph):
+  search_points = [get_closest_node(node, graph) for node in [start, end]]
+  path = nx.shortest_path(graph, source=search_points[0], target=search_points[1])
+  if (path[0] != str(start)):
+    path = [str(start)] + path
+  if (path[-1] != str(end)):
+    path.append(str(end))
+  return path
+
 # Prints the path nicely
 def print_path(start, end, path):
   start_str = " " + start + " >>> " + end + " "
@@ -84,25 +87,43 @@ def print_path(start, end, path):
     print str(i+1).rjust(3) + ".   " + node
   print line_str + '\n'
 
+# Find closest node in graph, returns node name
+# Graph must have geopoints on nodes
+def get_closest_node(point, graph):
+  if (str(point) in graph):
+    return str(point)
+  min_dist = float('Inf')
+  min_node = graph.nodes()[0]
+  for n in graph:
+    dist = distance.distance(point, geopy.Point(graph.node[n])).m 
+    if (dist < min_dist):
+      min_dist = dist
+      min_node = n
+  return min_node
+
+
 def main():
-  # TODO (gbcowan) get these properly
-  input_path = sys.argv[1]
-  output_path = sys.argv[2]
-  create_flag = (sys.argv[3].upper() =='TRUE')
+  parser = argparse.ArgumentParser(description="Parse CSV into graph, or find path")
+  parser.add_argument('-p','--pickle', help='Path to graph pickle, either to be generated or read', required=True)
+  parser.add_argument('-c','--csv', help='Path to csv file to parse', required=False)
+  args = vars(parser.parse_args())
 
-  # Make nx graph
-  G = load_graph(input_path)
+  csv_path = args['csv']
+  pickle_path = args['pickle']
   
-  # Make path dictionary
-  if(create_flag):
-    output_shortest_paths(G, output_path)
+  # Make graph and save to disk
+  if(csv_path != None):
+    G = create_graph(csv_path)
+    pickle_graph(G, pickle_path)
 
-  # Print some sample paths
+  # Load in graph, and print a sample path
   else:
-    paths = load_shortest_paths(output_path)
-    start = G.nodes()[34]
-    end = G.nodes()[1518]
-    print_path(start, end, paths[start][end])
+    G = load_pickled_graph(pickle_path)
 
+    a = geopy.Point(-37.816472, 144.964888)
+    b = geopy.Point(-37.808551, 144.968525)
+    print_path(str(a), str(b), get_path(a, b, G))
+    # draw_graph(G)
+    
 if __name__ == "__main__":
     main()
