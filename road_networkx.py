@@ -19,7 +19,7 @@ def create_graph(input_path):
   with open(input_path) as csvfile:
     reader = csv.DictReader(csvfile)
     for i, row in enumerate(reader):
-      if(i%10000=0):
+      if(i%10000==0):
         print i
       wkt_string = row['WKT']
       bidirectional = (row['DIR_CODE'] == 'B')
